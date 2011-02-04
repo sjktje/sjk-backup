@@ -8,11 +8,32 @@ use Config::Scoped;
 use File::Rsync;
 use Parallel::ForkManager;
 
-# Read the configuration file.
-my $config = read_conf();
 
-# Die if backup_root is not set up properly.
-check_backup_root($config->{'general'}{'backup_root'});
+################################################################################
+#### GLOBAL VARIABLES
+################################################################################
+
+# Reference to config hash
+my $config;
+
+# Verbosity level (log_level in config)
+my $verbose;
+
+# Directory containing lock/pid files.
+my $lock_directory;
+
+
+################################################################################
+#### SJK-BACKUP
+################################################################################
+
+# Read the configuration file.
+$config = read_conf();
+
+# Run various checks on config.
+check_config();
+
+$verbose = $config->{'general'}{'log_level'};
 
 # Do the backups.
 do_backups($config);
@@ -22,8 +43,51 @@ do_backups($config);
 #### FUNCTIONS
 ################################################################################
 
-sub create_pid_file {
-	my $pid = shift;
+sub create_lock_file {
+	my ($pid,$name) = shift;
+	my $file = "/tmp/sjk-backup/$name.pid";
+
+}
+
+# Run checks on config.
+sub check_config {
+	check_backup_root($config->{'general'}->{'backup_root'});
+	check_lock_directory($config->{'general'}->{'lock_directory'});
+}
+
+# Returns a reference to a structure holding the config data.
+sub read_conf {
+	my $parser = new Config::Scoped file => 'sjk-backup.conf';
+	$config = $parser->parse;
+	return $config;
+}
+
+# Check if backup_root is defined, if it exists and is writable.
+sub check_backup_root {
+	my $root = shift;
+	die "No backup_root defined" unless defined $config->{'general'}{'backup_root'};
+	die "$root does not exist" unless -e $root;
+	die "$root is not writable by us" unless -w $root;
+	die "$root is not a directory" unless -d $root;
+}
+
+# Check if lock_directory is defined, if it exists and is writable.
+sub check_lock_directory {
+	my $directory = shift;
+
+	die "No lock_directory defined" unless defined $config->{'general'}{'lock_directory'};
+	die "$directory does not exist. Please create it." unless -d $directory;
+	die "$directory is not writable" unless -w $directory;
+}
+
+# Prints warning if $level is <= $verbose (defined in config as log_level).
+sub print_warning {
+	my ($message, $level) = @_;
+	
+	if (!defined($VERBOSE) || ($level <= $VERBOSE)) {
+		print STDERR "Warning: $message\n";
+	}
+}
 
 # Iterate through the hosts that should be backed up and execute the parallel
 # rsyncs.
@@ -82,20 +146,6 @@ sub backup_host {
 	}
 }
 
-# Returns a reference to a structure holding the config data.
-sub read_conf {
-	my $parser = new Config::Scoped file => 'sjk-backup.conf';
-	$config = $parser->parse;
-	return $config;
-}
-
-sub check_backup_root {
-	my $root = shift;
-	die "No backup_root defined" unless defined $config->{'general'}{'backup_root'};
-	die "$root does not exist" unless -e $root;
-	die "$root is not writable by us" unless -w $root;
-	die "$root is not a directory" unless -d $root;
-}
 
 
 # Read config file. 
