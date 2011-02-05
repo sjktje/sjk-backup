@@ -67,7 +67,7 @@ sub remove_lock_file {
 	my $name = shift;
 	my $file = $lock_directory."/".$name.".lock";
 
-	if (unlink($file) != 0) {
+	if (unlink($file) == 0) {
 		print_warning("Could not remove $file: $!", 1);
 		return 1;
 	}
