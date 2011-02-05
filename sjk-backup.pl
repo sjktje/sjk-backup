@@ -195,11 +195,6 @@ sub backup_host {
 	my $backup_root = $conf->{'general'}->{'backup_root'};
 	my $bwlimit = $hostconf->{'bwlimit'} ? $hostconf->{'bwlimit'} : 0;
 
-#	print "Time to backup $name...\n";
-#	foreach my $key (keys %{$conf}) {
-#		print "$key = $conf->{$key}\n";
-#	}
-
 	# Rotate backups first.
 	rotate_backups($name);
 
