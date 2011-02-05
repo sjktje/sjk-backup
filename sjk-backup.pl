@@ -233,6 +233,9 @@ sub backup_host {
 		my $dst = "$backup_root/$name.0";
 		my $prev = "$backup_root/$name.1";
 
+		my $secs = $config->{'general'}{'seconds_between_retries'};
+		my $retries = $config->{'general'}{'retries'};
+
 		my %settings = (
 			'archive'			=> 1,
 			'hard-links'		=> 1,
@@ -256,10 +259,15 @@ sub backup_host {
 		print_info("Backing up $src to $dst", 1);
 
 		my $rsync = File::Rsync->new(\%settings);
-		$rsync->exec({
-				src => $src,
-				dest => $dst
-		}) or print_warning("Rsync failed.", 1);
+
+		for (my $i = 0; $i <= $retries; $i++) {
+			# If rsync succeeds, break the loop.
+			last if $rsync->exec({ src => $src, dest => $dst});
+
+			print_warning("Rsync of $src to $dst failed, waiting $secs seconds before trying again.", 1);
+			sleep $secs;
+		}
+
 	}
 }
 
