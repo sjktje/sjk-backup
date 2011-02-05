@@ -77,9 +77,10 @@ sub remove_lock_file {
 
 # Write pid to lock file.
 sub write_pid {
-	my ($file, $pid) = @_;
+	my ($name, $pid) = @_;
 	
-	if (!-e $lock_directory."/".$file) {
+	my $file = $lock_directory."/".$name.".lock";
+	if (!-e $file) {
 		print_warning("$file does not exist.", 1);
 		return 1;
 	}
