@@ -156,6 +156,15 @@ sub print_warning {
 	}
 }
 
+# Print info if $level is <= $verbose (defined in config as log_level.
+sub print_info {
+	my ($message, $level) = @_;
+
+	if (!defined($verbose) || ($level <= $verbose)) {
+		print STDERR "Info: $message\n";
+	}
+}
+
 # Iterate through the hosts that should be backed up and execute the parallel
 # rsyncs.
 sub do_backups {
@@ -199,9 +208,9 @@ sub backup_host {
 		$path = strip_trailing_slash($path);
 		my $src = "$user\@$host:\"$path\"";
 		my $dst = "$backup_root/$name.0";
+		my $prev = "$backup_root/$name.1";
 
-		print "BACKING UP $src TO $dst\n";
-		my $rsync = File::Rsync->new({
+		my %settings = (
 			'archive'			=> 1,
 			'hard-links'		=> 1,
 			'human-readable'	=> 1,
@@ -213,13 +222,19 @@ sub backup_host {
 			#	'xattr'				=> 1,
 			'partial'			=> 1,
 			#	'progress'			=> 1,
-			'verbose'			=> 1,
-			'bwlimit'			=> $bwlimit,
-		});
+			#	'verbose'			=> 1,
+		);
+
+		$settings{'bwlimit'} = $bwlimit if defined $bwlimit;
+		$settings{'link-dest'} = \$prev if -d $prev;
+
+		print_info("Backing up $src to $dst", 1);
+
+		my $rsync = File::Rsync->new(\%settings);
 		$rsync->exec({
 				src => $src,
 				dest => $dst
-		}) or warn "Rsync failed.";
+		}) or print_warning("Rsync failed.", 1);
 	}
 }
 
