@@ -61,6 +61,20 @@ sub create_lock_file {
 	return 0;
 }
 
+# Removes lock file. Prints warning and returns 1 if it does not succeed, 
+# returns 0 otherwise.
+sub remove_lock_file {
+	my $name = shift;
+	my $file = $lock_directory."/".$name.".lock";
+
+	if (unlink($file) != 0) {
+		print_warning("Could not remove $file: $!", 1);
+		return 1;
+	}
+
+	return 0;
+}
+
 # Write pid to lock file.
 sub write_pid {
 	my ($file, $pid) = @_;
@@ -128,9 +142,11 @@ sub do_backups {
 
 		my $pid = $pfm->start and next; # Fork!
 
-		write_pid($key, $pid) or die;
-
+		# Write the pid to the lock file.
+		die if write_pid($key, $pid);
 		backup_host($key, $config);
+
+		remove_lock_file($key);
 		$pfm->finish;
 	}
 	$pfm->wait_all_children;
