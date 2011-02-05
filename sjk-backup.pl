@@ -7,7 +7,7 @@ use warnings;
 use Config::Scoped;
 use File::Copy;
 use File::Rsync;
-use File::Path;
+use File::Path qw(remove_tree);
 use Parallel::ForkManager;
 
 
@@ -49,21 +49,20 @@ do_backups($config);
 # Rotate backups (and delete oldest)
 sub rotate_backups {
 	my $name = shift;
-	my $max = $config->{'backups'}{$name}{'number_of_backups'};
+	my $max = $config->{'backup'}{$name}{'number_of_backups'};
 	my $backup_root = $config->{'general'}{'backup_root'};
 	my $backup = $backup_root."/".$name;
 	
-	for (my $i = $max; $1 == 0; $i--) {
-		my $j = $i - 1;
+	for (my $i = $max; $i != -1; $i--) {
+		my $j = $i + 1;
 
-		if (-d "$backup.$i" && $i = $max) {
-			rmtree($backup.$i, 1, 1);
+		if (-d "$backup.$i" && $i == $max) {
+			remove_tree("$backup.$i", { verbose => 0 }) or die "Could not remove_tree $backup.$i: $!";
 			next;
 		}
 
 		if (-d "$backup.$i") {
-			move("$backup.$i", "$backup.$j") or 
-				print_warning("Couldn't move $backup.$i to $backup.$j: $!");
+			move("$backup.$i", "$backup.$j") or die "Could not move $backup.$i to $backup.$j: $!";
 		}
 	}
 
@@ -191,6 +190,9 @@ sub backup_host {
 #	foreach my $key (keys %{$conf}) {
 #		print "$key = $conf->{$key}\n";
 #	}
+
+	# Rotate backups first.
+	rotate_backups($name);
 
 	foreach my $path (@{$hostconf->{'path'}}) {
 
