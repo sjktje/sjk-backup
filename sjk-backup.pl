@@ -47,7 +47,7 @@ do_backups($config);
 # Creates lock file. Prints warning and returns 1 if file already exists.
 # If the file doesn't exist it creates it and returns 0.
 sub create_lock_file {
-	my ($pid,$name) = shift;
+	my $name = shift;
 	my $file = $lock_directory."/".$name.".lock";
 	
 	if (-e $file) {
@@ -56,6 +56,21 @@ sub create_lock_file {
 	}
 
 	open my $fh, ">$file" or die "Could not create $file: $!";
+	close $fh;
+
+	return 0;
+}
+
+# Write pid to lock file.
+sub write_pid {
+	my ($file, $pid) = @_;
+	
+	if (!-e $file) {
+		print_warning("$file does not exist.", 1);
+		return 1;
+	}
+
+	open my $fh, ">$file" or die "Could not open $file for writing: $!";
 	print $fh $pid;
 	close $fh;
 
@@ -109,7 +124,6 @@ sub do_backups {
 	my $pfm = new Parallel::ForkManager(4); # Four rsyncs at a time seems good.
 	foreach my $key (keys %{$config->{'backup'}}) {
 		my $pid = $pfm->start and next; # Fork!
-		#create_pid_file($pid, user, host); typ, eller något.
 		backup_host($key, $config);
 		$pfm->finish;
 	}
