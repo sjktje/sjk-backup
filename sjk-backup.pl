@@ -223,10 +223,11 @@ sub backup_host {
 			'partial'			=> 1,
 			#	'progress'			=> 1,
 			#	'verbose'			=> 1,
+			'link-dest'			=> $prev
 		);
 
 		$settings{'bwlimit'} = $bwlimit if defined $bwlimit;
-		$settings{'link-dest'} = \$prev if -d $prev;
+		#$settings{'link-dest'} = $prev if -d $prev;
 
 		print_info("Backing up $src to $dst", 1);
 
