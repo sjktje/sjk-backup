@@ -65,7 +65,7 @@ sub create_lock_file {
 sub write_pid {
 	my ($file, $pid) = @_;
 	
-	if (!-e $file) {
+	if (!-e $lock_directory."/".$file) {
 		print_warning("$file does not exist.", 1);
 		return 1;
 	}
