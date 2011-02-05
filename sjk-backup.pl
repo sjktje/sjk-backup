@@ -34,6 +34,7 @@ $config = read_conf();
 check_config();
 
 $verbose = $config->{'general'}{'log_level'};
+$lock_directory = strip_trailing_slash($config->{'general'}{'lock_directory'});
 
 # Do the backups.
 do_backups($config);
@@ -43,10 +44,22 @@ do_backups($config);
 #### FUNCTIONS
 ################################################################################
 
+# Creates lock file. Prints warning and returns 1 if file already exists.
+# If the file doesn't exist it creates it and returns 0.
 sub create_lock_file {
 	my ($pid,$name) = shift;
-	my $file = "/tmp/sjk-backup/$name.pid";
+	my $file = $lock_directory."/".$name.".lock";
+	
+	if (-e $file) {
+		print_warning("$file does alread exist!", 1);
+		return 1;
+	}
 
+	open my $fh, ">$file" or die "Could not create $file: $!";
+	print $fh $pid;
+	close $fh;
+
+	return 0;
 }
 
 # Run checks on config.
