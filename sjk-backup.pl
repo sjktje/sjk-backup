@@ -112,7 +112,7 @@ sub check_lock_directory {
 sub print_warning {
 	my ($message, $level) = @_;
 	
-	if (!defined($VERBOSE) || ($level <= $VERBOSE)) {
+	if (!defined($verbose) || ($level <= $verbose)) {
 		print STDERR "Warning: $message\n";
 	}
 }
