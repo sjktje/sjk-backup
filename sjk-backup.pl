@@ -103,7 +103,7 @@ sub create_lock_file {
 	my $file = $lock_directory."/".$name.".lock";
 	
 	if (-e $file) {
-		print_warning("$file does alread exist!", 1);
+		print_warning("$file does already exist!", 1);
 		return 1;
 	}
 
