@@ -5,7 +5,9 @@ use strict;
 use warnings;
 
 use Config::Scoped;
+use File::Copy;
 use File::Rsync;
+use File::Path;
 use Parallel::ForkManager;
 
 
@@ -43,6 +45,29 @@ do_backups($config);
 ################################################################################
 #### FUNCTIONS
 ################################################################################
+
+# Rotate backups (and delete oldest)
+sub rotate_backups {
+	my $name = shift;
+	my $max = $config->{'backups'}{$name}{'number_of_backups'};
+	my $backup_root = $config->{'general'}{'backup_root'};
+	my $backup = $backup_root."/".$name;
+	
+	for (my $i = $max; $1 == 0; $i--) {
+		my $j = $i - 1;
+
+		if (-d "$backup.$i" && $i = $max) {
+			rmtree($backup.$i, 1, 1);
+			next;
+		}
+
+		if (-d "$backup.$i") {
+			move("$backup.$i", "$backup.$j") or 
+				print_warning("Couldn't move $backup.$i to $backup.$j: $!");
+		}
+	}
+
+}
 
 # Creates lock file. Prints warning and returns 1 if file already exists.
 # If the file doesn't exist it creates it and returns 0.
