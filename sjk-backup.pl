@@ -9,14 +9,20 @@ use File::Copy;
 use File::Rsync;
 use File::Path qw(remove_tree);
 use Parallel::ForkManager;
+use Getopt::Std;
 
 
 ################################################################################
 #### GLOBAL VARIABLES
 ################################################################################
 
+my $VERSION = '0.1';
+
 # Reference to config hash
 my $config;
+
+# Reference to hash containing command line options used
+my $args;
 
 # Verbosity level (log_level in config)
 my $verbose;
@@ -28,6 +34,10 @@ my $lock_directory;
 ################################################################################
 #### SJK-BACKUP
 ################################################################################
+
+$args = parse_args();
+
+VERSION_MESSAGE() if defined $args->{'v'};
 
 # Read the configuration file.
 $config = read_conf();
@@ -45,6 +55,24 @@ do_backups($config);
 ################################################################################
 #### FUNCTIONS
 ################################################################################
+
+sub VERSION_MESSAGE {
+	print "$0 version $VERSION\n";
+	exit(1);
+}
+
+sub parse_args {
+	my %args;
+	my $res;
+
+	if (($res = getopts('vh', \%args)) != 1) {
+		print STDERR "Type $0 --help for help.\n";
+		exit(1);
+	}
+
+	return \%args;
+}
+
 
 # Rotate backups (and delete oldest)
 sub rotate_backups {
