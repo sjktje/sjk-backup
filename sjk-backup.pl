@@ -223,32 +223,6 @@ sub backup_host {
 	}
 }
 
-
-
-# Read config file. 
-#sub read_conf {
-#	open my $fh, '<', 'sjk-backup.conf' or die "Couldn't open config: $!";
-#
-#	while(<$fh>) {
-#		next if is_comment($_);
-#		next if is_empty_line($_);
-#
-#		print "Config: $_";
-#
-#		if ($_ =~ /^backup_root (.*)$/) {
-#			$config{'backup_root'} = $1;
-#		}
-#
-#		if ($_ =~ /^backup ([^@]*)\@(.*):(.*) (.*)$/) {
-#			print "Going to backup $1\@$2:$3 to $4\n";
-#		}
-#	}
-#
-#	close $fh or die "Couldn't close config: $!";
-#
-#	die "No backup_root defined." if not defined $config{'backup_root'};
-#}
-
 # is_comment($line)
 # Returns true if $line is a comment, and false if it is not.
 sub is_comment {
