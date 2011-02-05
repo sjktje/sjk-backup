@@ -227,9 +227,15 @@ sub backup_host {
 	rotate_backups($name);
 
 	foreach my $path (@{$hostconf->{'path'}}) {
-
 		$path = strip_trailing_slash($path);
-		my $src = "$user\@$host:\"$path\"";
+		my $src;
+
+		if (defined($user) && defined($host)) {
+			$src = "$user\@$host:\"$path\"";
+		} else {
+			$src = $path;
+		}
+
 		my $dst = "$backup_root/$name.0";
 		my $prev = "$backup_root/$name.1";
 
@@ -267,6 +273,8 @@ sub backup_host {
 			print_warning("Rsync of $src to $dst failed, waiting $secs seconds before trying again.", 1);
 			sleep $secs;
 		}
+
+		print_info("Rsync exited with status ".$rsync->status, 3);
 
 	}
 }
