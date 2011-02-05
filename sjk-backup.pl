@@ -123,7 +123,13 @@ sub do_backups {
 	my $config = shift;
 	my $pfm = new Parallel::ForkManager(4); # Four rsyncs at a time seems good.
 	foreach my $key (keys %{$config->{'backup'}}) {
+		# If the lock file already exists a sync is probably already going.
+		next if create_lock_file($key); 
+
 		my $pid = $pfm->start and next; # Fork!
+
+		write_pid($key, $pid) or die;
+
 		backup_host($key, $config);
 		$pfm->finish;
 	}
