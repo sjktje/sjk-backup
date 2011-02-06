@@ -85,11 +85,13 @@ sub rotate_backups {
 		my $j = $i + 1;
 
 		if (-d "$backup.$i" && $i == $max) {
+			print_info("Removing $backup.$i.", 4);
 			remove_tree("$backup.$i", { verbose => 0 }) or die "Could not remove_tree $backup.$i: $!";
 			next;
 		}
 
 		if (-d "$backup.$i") {
+			print_info("Moving $backup.$i to $backup.$j", 4);
 			move("$backup.$i", "$backup.$j") or die "Could not move $backup.$i to $backup.$j: $!";
 		}
 	}
@@ -107,6 +109,8 @@ sub create_lock_file {
 		return 1;
 	}
 
+	print_info("Creating lockfile $file", 4);
+
 	open my $fh, ">$file" or die "Could not create $file: $!";
 	close $fh;
 
@@ -118,6 +122,8 @@ sub create_lock_file {
 sub remove_lock_file {
 	my $name = shift;
 	my $file = $lock_directory."/".$name.".lock";
+
+	print_info("Removing lockfile $file", 4);
 
 	if (unlink($file) == 0) {
 		print_warning("Could not remove $file: $!", 1);
@@ -137,6 +143,8 @@ sub write_pid {
 		return 1;
 	}
 
+	print_info("Writing pid ($pid) to $file", 4);
+	
 	open my $fh, ">$file" or die "Could not open $file for writing: $!";
 	print $fh $pid;
 	close $fh;
@@ -223,8 +231,31 @@ sub backup_host {
 	my $backup_root = $conf->{'general'}->{'backup_root'};
 	my $bwlimit = $hostconf->{'bwlimit'} ? $hostconf->{'bwlimit'} : 0;
 
-	# Rotate backups first.
-	rotate_backups($name);
+	my $dst = "$backup_root/$name.0.unfinished";
+	my $prev = "$backup_root/$name.1";
+
+	my $secs = $config->{'general'}{'seconds_between_retries'};
+	my $retries = $config->{'general'}{'retries'};
+
+	my %settings = (
+		'archive'			=> 1,
+		'hard-links'		=> 1,
+		'human-readable'	=> 1,
+		'inplace'			=> 1,
+		'numeric-ids'		=> 1,
+		'delete'			=> 1,
+		'delete-excluded'	=> 1,
+		'relative'			=> 1,
+		'acls'				=> 1,
+		#	'xattr'				=> 1,
+		'partial'			=> 1,
+		#	'progress'			=> 1,
+		#	'verbose'			=> 1,
+		'link-dest'			=> [ $prev ]
+	);
+
+	$settings{'bwlimit'} = $bwlimit if defined $bwlimit;
+	#$settings{'link-dest'} = $prev if -d $prev;
 
 	foreach my $path (@{$hostconf->{'path'}}) {
 		$path = strip_trailing_slash($path);
@@ -235,32 +266,6 @@ sub backup_host {
 		} else {
 			$src = $path;
 		}
-
-		my $dst = "$backup_root/$name.0";
-		my $prev = "$backup_root/$name.1";
-
-		my $secs = $config->{'general'}{'seconds_between_retries'};
-		my $retries = $config->{'general'}{'retries'};
-
-		my %settings = (
-			'archive'			=> 1,
-			'hard-links'		=> 1,
-			'human-readable'	=> 1,
-			'inplace'			=> 1,
-			'numeric-ids'		=> 1,
-			'delete'			=> 1,
-			'delete-excluded'	=> 1,
-			'relative'			=> 1,
-			'acls'				=> 1,
-			#	'xattr'				=> 1,
-			'partial'			=> 1,
-			#	'progress'			=> 1,
-			#	'verbose'			=> 1,
-			'link-dest'			=> [ $prev ]
-		);
-
-		$settings{'bwlimit'} = $bwlimit if defined $bwlimit;
-		#$settings{'link-dest'} = $prev if -d $prev;
 
 		print_info("Backing up $src to $dst", 1);
 
@@ -277,6 +282,14 @@ sub backup_host {
 		print_info("Rsync exited with status ".$rsync->status, 3);
 
 	}
+
+	print_info("Rotating backups", 3);
+	rotate_backups($name);
+
+	
+	print_info("Moving $dst to $backup_root/$name.0", 3);
+	move("$dst", "$backup_root/$name.0") or die "Could not move $dst to $backup_root/$name.0: $!";
+
 }
 
 # is_comment($line)
