@@ -6,10 +6,10 @@ use warnings;
 
 use Config::Scoped;
 use File::Copy;
-use File::Rsync;
 use File::Path qw(remove_tree);
-use Parallel::ForkManager;
+use File::Rsync;
 use Getopt::Std;
+use Parallel::ForkManager;
 
 
 ################################################################################
