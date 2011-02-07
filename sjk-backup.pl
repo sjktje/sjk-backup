@@ -260,7 +260,7 @@ sub backup_host {
 		'hard-links'		=> 1,
 		'human-readable'	=> 1,
 		'inplace'			=> 1,
-		'link-dest'			=> [ $prev ]
+		'link-dest'			=> [ $prev ],
 		'numeric-ids'		=> 1,
 		'one-file-system'	=> 1,
 		'partial'			=> 1,
