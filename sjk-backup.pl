@@ -78,7 +78,7 @@ sub parse_args {
 sub rotate_backups {
 	my $name = shift;
 	my $max = $config->{'backup'}{$name}{'number_of_backups'};
-	my $backup_root = $config->{'general'}{'backup_root'};
+	my $backup_root = $config->{'general'}{'backup_root'}."/".$name;
 	my $backup = $backup_root."/".$name;
 	
 	for (my $i = $max; $i != -1; $i--) {
@@ -231,8 +231,8 @@ sub backup_host {
 	my $backup_root = $conf->{'general'}->{'backup_root'};
 	my $bwlimit = $hostconf->{'bwlimit'} ? $hostconf->{'bwlimit'} : 0;
 
-	my $dst = "$backup_root/$name.0.unfinished";
-	my $prev = "$backup_root/$name.1";
+	my $dst = "$backup_root/$name/$name.0.unfinished";
+	my $prev = "$backup_root/$name/$name.1";
 
 	my $secs = $config->{'general'}{'seconds_between_retries'};
 	my $retries = $config->{'general'}{'retries'};
@@ -256,6 +256,8 @@ sub backup_host {
 
 	$settings{'bwlimit'} = $bwlimit if defined $bwlimit;
 	#$settings{'link-dest'} = $prev if -d $prev;
+
+	is_directory("$backup_root/$name") or mkdir("$backup_root/$name");
 
 	foreach my $path (@{$hostconf->{'path'}}) {
 		$path = strip_trailing_slash($path);
@@ -313,6 +315,13 @@ sub is_empty_line {
 	} else {
 		return 0;
 	}
+}
+
+sub is_directory {
+	my $dir = shift;
+	return 1 if -d $dir;
+
+	return 0;
 }
 
 sub strip_trailing_slash {
