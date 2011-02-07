@@ -362,7 +362,7 @@ sub write_log {
 
 	my $logfile = $config->{'general'}{'log_file'};
 
-	if (!defined($verbose) || ($level >= $verbose)) {
+	if (!defined($verbose) || ($level > $verbose)) {
 		return (undef);
 	}
 
