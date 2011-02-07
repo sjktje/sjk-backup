@@ -292,6 +292,7 @@ sub backup_host {
 
 			write_log("Rsync of $src to $dst failed, waiting $secs seconds before trying again.", 1);
 			write_log("Rsync exited with status ".$rsync->status, 5);
+			write_log("Rsync command used: ".$rsync->lastcmd, 5);
 
 			sleep $secs;
 		}
