@@ -291,11 +291,11 @@ sub backup_host {
 			last if $rsync->exec({ src => $src, dest => $dst});
 
 			write_log("Rsync of $src to $dst failed, waiting $secs seconds before trying again.", 1);
+			write_log("Rsync exited with status ".$rsync->status, 5);
 
 			sleep $secs;
 		}
 
-		write_log("Rsync exited with status ".$rsync->status, 5);
 
 	}
 
