@@ -1,0 +1,49 @@
+general {
+	# Backups will be put under $backup_root/$name/$name.N
+	backup_root = "/Users/sjk/Code/backup"
+	
+	# Number of rsync processes that should be run at the same time. Default is 4.
+	max_concurrent_rsyncs = 4
+
+	# Log level:
+	#	1 - only log errors
+	#	3 - log errors and informational messages (default)
+	#   5 - debug
+	log_level = 3 
+
+	# Log file
+	log_file = "/Users/sjk/Code/backup/sjkbackup.log"
+
+	# This is the directory where lock/pid files will be kept. 
+	lock_directory = "/Users/sjk/Code/backup/lockdir"
+
+	# Number of times to try rsyncing before giving up.
+	retries = 20
+
+	# Delay between rsync retries (default: 600)
+	seconds_between_retries = 600
+}
+
+# Creates a backup entry called "somebox". Entry names must be unique.
+backup "somebox" {
+	# Host to backup. Skip this if backing up local filesystems.
+	host = "somebox.ankeborg.nu"
+	
+	# User to log in as. Skip this if backing up local filesystems.
+	user = "root"
+	
+	# Paths to back up.
+	path = [ "/etc" "/usr/local/etc" "/root" "/home" ]
+
+	# Optionally limit bandwidth usage when backing up this host (kbps).
+	bwlimit = 800
+
+	# Number of incremental backups to keep.
+	number_of_backups = 3
+}
+
+# Example of local backup.
+backup "localhost" {
+	path = [ "/Users/sjk/config" ]
+	number_of_backups = 1
+}
