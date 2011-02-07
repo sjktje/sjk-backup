@@ -22,6 +22,7 @@ use File::Path qw(remove_tree);
 use File::Rsync;
 use Getopt::Std;
 use Parallel::ForkManager;
+use sigtrap qw(handler cleanup_and_exit normal-signals);
 
 
 ################################################################################
@@ -377,4 +378,10 @@ sub write_log {
 	print "$line\n" if $args->{'v'};
 
 	close $fh or die "Could not close $logfile: $!";
+}
+
+# This function is called when program is killed.
+sub cleanup_and_exit {
+	# Clear out the lock file directory.
+	remove_tree($lock_directory, { verbose => 0, keep_root => 1 }) or die "Could not remove_tree $lock_directory: $!";
 }
