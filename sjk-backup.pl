@@ -341,3 +341,22 @@ sub strip_trailing_slash {
 sub mkdate {
 	return localtime;
 }
+
+# Write log message.
+sub write_log {
+	my ($line, $level) = @_;
+
+	my $logfile = $config->{'general'}{'log_file'};
+
+	if (defined($verbose) || ($level =< $verbose)) {
+		return (undef);
+	}
+
+	chomp($line);
+
+	open my $fh, ">> $logfile" or die "Could not open $logfile: $!";
+	my $date = mkdate();
+	print $fh "$date: $line\n";
+
+	close $fh or die "Could not close $logfile: $!";
+}
