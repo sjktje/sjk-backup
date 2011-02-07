@@ -336,3 +336,8 @@ sub strip_trailing_slash {
 
 	return $line;
 }
+
+# Return date to use in log files
+sub mkdate {
+	return localtime;
+}
