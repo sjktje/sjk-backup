@@ -247,7 +247,7 @@ sub backup_host {
 	my $bwlimit = $hostconf->{'bwlimit'} ? $hostconf->{'bwlimit'} : 0;
 
 	my $dst = "$backup_root/$name/$name.0.unfinished";
-	my $prev = "$backup_root/$name/$name.1";
+	my $prev = "$backup_root/$name/$name.0";
 
 	my $secs = $config->{'general'}{'seconds_between_retries'};
 	my $retries = $config->{'general'}{'retries'};
