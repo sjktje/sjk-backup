@@ -253,20 +253,18 @@ sub backup_host {
 	my $retries = $config->{'general'}{'retries'};
 
 	my %settings = (
+		'acls'				=> 1,
 		'archive'			=> 1,
+		'delete'			=> 1,
+		'delete-excluded'	=> 1,
 		'hard-links'		=> 1,
 		'human-readable'	=> 1,
 		'inplace'			=> 1,
-		'numeric-ids'		=> 1,
-		'delete'			=> 1,
-		'delete-excluded'	=> 1,
-		'relative'			=> 1,
-		'acls'				=> 1,
-		#	'xattr'				=> 1,
-		'partial'			=> 1,
-		#	'progress'			=> 1,
-		#	'verbose'			=> 1,
 		'link-dest'			=> [ $prev ]
+		'numeric-ids'		=> 1,
+		'one-file-system'	=> 1,
+		'partial'			=> 1,
+		'relative'			=> 1,
 	);
 
 	$settings{'bwlimit'} = $bwlimit if defined $bwlimit;
