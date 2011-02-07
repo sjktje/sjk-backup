@@ -1,6 +1,6 @@
 general {
 	# Backups will be put under $backup_root/$name/$name.N
-	backup_root = "/Users/sjk/Code/backup"
+	backup_root = "/data/backups"
 	
 	# Number of rsync processes that should be run at the same time. Default is 4.
 	max_concurrent_rsyncs = 4
@@ -12,10 +12,10 @@ general {
 	log_level = 3 
 
 	# Log file
-	log_file = "/Users/sjk/Code/backup/sjkbackup.log"
+	log_file = "/var/log/sjkbackup.log"
 
 	# This is the directory where lock/pid files will be kept. 
-	lock_directory = "/Users/sjk/Code/backup/lockdir"
+	lock_directory = "/tmp/sjkbackup"
 
 	# Number of times to try rsyncing before giving up.
 	retries = 20
@@ -39,11 +39,11 @@ backup "somebox" {
 	bwlimit = 800
 
 	# Number of incremental backups to keep.
-	number_of_backups = 3
+	number_of_backups = 30
 }
 
 # Example of local backup.
 backup "localhost" {
-	path = [ "/Users/sjk/config" ]
-	number_of_backups = 1
+	path = [ "/Users/sjk" ]
+	number_of_backups = 30
 }
