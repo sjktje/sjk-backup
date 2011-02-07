@@ -37,7 +37,7 @@ my $lock_directory;
 
 $args = parse_args();
 
-VERSION_MESSAGE() if defined $args->{'v'};
+VERSION_MESSAGE() if defined $args->{'V'};
 
 # Read the configuration file.
 $config = read_conf();
@@ -61,11 +61,12 @@ sub VERSION_MESSAGE {
 	exit(1);
 }
 
+# Parse command line arguments.
 sub parse_args {
 	my %args;
 	my $res;
 
-	if (($res = getopts('vh', \%args)) != 1) {
+	if (($res = getopts('hvV', \%args)) != 1) {
 		print STDERR "Type $0 --help for help.\n";
 		exit(1);
 	}
@@ -85,13 +86,13 @@ sub rotate_backups {
 		my $j = $i + 1;
 
 		if (-d "$backup.$i" && $i == $max) {
-			print_info("Removing $backup.$i.", 4);
+			write_log("Removing $backup.$i.", 5);
 			remove_tree("$backup.$i", { verbose => 0 }) or die "Could not remove_tree $backup.$i: $!";
 			next;
 		}
 
 		if (-d "$backup.$i") {
-			print_info("Moving $backup.$i to $backup.$j", 4);
+			write_log("Moving $backup.$i to $backup.$j", 5);
 			move("$backup.$i", "$backup.$j") or die "Could not move $backup.$i to $backup.$j: $!";
 		}
 	}
@@ -105,11 +106,11 @@ sub create_lock_file {
 	my $file = $lock_directory."/".$name.".lock";
 	
 	if (-e $file) {
-		print_warning("$file does already exist!", 1);
+		write_log("Error creating lock file: $file does already exist!", 1);
 		return 1;
 	}
 
-	print_info("Creating lockfile $file", 4);
+	write_log("Creating lockfile $file", 5);
 
 	open my $fh, ">$file" or die "Could not create $file: $!";
 	close $fh;
@@ -123,10 +124,10 @@ sub remove_lock_file {
 	my $name = shift;
 	my $file = $lock_directory."/".$name.".lock";
 
-	print_info("Removing lockfile $file", 4);
+	write_log("Removing lockfile $file", 5);
 
 	if (unlink($file) == 0) {
-		print_warning("Could not remove $file: $!", 1);
+		write_log("Error removing lock file ($file): $!", 1);
 		return 1;
 	}
 
@@ -139,11 +140,11 @@ sub write_pid {
 	
 	my $file = $lock_directory."/".$name.".lock";
 	if (!-e $file) {
-		print_warning("$file does not exist.", 1);
+		write_log("Error writing pid to file: $file does not exist.", 1);
 		return 1;
 	}
 
-	print_info("Writing pid ($pid) to $file", 4);
+	write_log("Writing pid ($pid) to $file", 5);
 	
 	open my $fh, ">$file" or die "Could not open $file for writing: $!";
 	print $fh $pid;
@@ -269,7 +270,7 @@ sub backup_host {
 			$src = $path;
 		}
 
-		print_info("Backing up $src to $dst", 1);
+		write_log("Backing up $src", 2);
 
 		my $rsync = File::Rsync->new(\%settings);
 
@@ -277,20 +278,21 @@ sub backup_host {
 			# If rsync succeeds, break the loop.
 			last if $rsync->exec({ src => $src, dest => $dst});
 
-			print_warning("Rsync of $src to $dst failed, waiting $secs seconds before trying again.", 1);
+			write_log("Rsync of $src to $dst failed, waiting $secs seconds before trying again.", 1);
+
 			sleep $secs;
 		}
 
-		print_info("Rsync exited with status ".$rsync->status, 3);
+		write_log("Rsync exited with status ".$rsync->status, 5);
 
 	}
 
-	print_info("Rotating backups", 3);
+	write_log("Rotating backups", 5);
 	rotate_backups($name);
 
 	
-	print_info("Moving $dst to $backup_root/$name.0", 3);
-	move("$dst", "$backup_root/$name.0") or die "Could not move $dst to $backup_root/$name.0: $!";
+	write_log("Moving $dst to $backup_root/$name.0", 5);
+	move("$dst", "$backup_root/$name/$name.0") or die "Could not move $dst to $backup_root/$name.0: $!";
 
 }
 
@@ -348,7 +350,7 @@ sub write_log {
 
 	my $logfile = $config->{'general'}{'log_file'};
 
-	if (defined($verbose) || ($level =< $verbose)) {
+	if (!defined($verbose) || ($level >= $verbose)) {
 		return (undef);
 	}
 
@@ -356,7 +358,10 @@ sub write_log {
 
 	open my $fh, ">> $logfile" or die "Could not open $logfile: $!";
 	my $date = mkdate();
+
 	print $fh "$date: $line\n";
+	
+	print "$line\n" if $args->{'v'};
 
 	close $fh or die "Could not close $logfile: $!";
 }
