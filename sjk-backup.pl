@@ -56,6 +56,7 @@ do_backups($config);
 #### FUNCTIONS
 ################################################################################
 
+# Tell everyone what version we're running!
 sub VERSION_MESSAGE {
 	print "$0 version $VERSION\n";
 	exit(1);
