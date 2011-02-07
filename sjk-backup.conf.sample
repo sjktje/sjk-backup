@@ -12,10 +12,10 @@ general {
 	log_level = 3 
 
 	# Log file
-	log_file = "/var/log/sjkbackup.log"
+	log_file = "/var/log/sjk-backup.log"
 
 	# This is the directory where lock/pid files will be kept. 
-	lock_directory = "/tmp/sjkbackup"
+	lock_directory = "/tmp/sjk-backup"
 
 	# Number of times to try rsyncing before giving up.
 	retries = 20
