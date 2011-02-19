@@ -27,7 +27,7 @@ use sigtrap qw(handler cleanup_and_exit normal-signals);
 use constant {
 	CONFFILE	=> '/usr/local/etc/sjk-backup.conf',
 	RSYNCPATH	=> '/usr/local/bin/rsync'
-}
+};
 
 ################################################################################
 #### GLOBAL VARIABLES
