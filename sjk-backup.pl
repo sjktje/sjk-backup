@@ -292,16 +292,20 @@ sub backup_host {
 		my $rsync = File::Rsync->new(\%settings);
 
 		for (my $i = 0; $i <= $retries; $i++) {
-			# If rsync succeeds, break the loop.
-			last if $rsync->exec({ src => $src, dest => $dst});
+			my $ret = $rsync->exec({ src => $src, dest => $dst});
 
+			write_log("Try $i: ".$rsync->lastcmd, 3);
+
+			# If rsync succeeds, break the loop.
+			last if $ret;
+
+			# We failed. Tell the user about it, wait and try again.
 			write_log("Rsync of $src to $dst failed, waiting $secs seconds before trying again.", 1);
 			write_log("Rsync exited with status ".$rsync->status, 5);
 			write_log("Rsync command used: ".$rsync->lastcmd, 5);
 
 			sleep $secs;
 		}
-
 
 	}
 
