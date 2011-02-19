@@ -22,6 +22,7 @@ use File::Path qw(remove_tree);
 use File::Rsync;
 use Getopt::Std;
 use Parallel::ForkManager;
+use constant CONFFILE => '/usr/local/etc/sjk-backup.conf';
 use sigtrap qw(handler cleanup_and_exit normal-signals);
 
 
@@ -175,7 +176,7 @@ sub check_config {
 
 # Returns a reference to a structure holding the config data.
 sub read_conf {
-	my $parser = new Config::Scoped file => 'sjk-backup.conf';
+	my $parser = new Config::Scoped file => CONFFILE;
 	$config = $parser->parse;
 	return $config;
 }
