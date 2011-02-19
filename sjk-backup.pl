@@ -26,7 +26,6 @@ use sigtrap qw(handler cleanup_and_exit normal-signals);
 
 use constant {
 	CONFFILE	=> '/usr/local/etc/sjk-backup.conf',
-	RSYNCPATH	=> '/usr/local/bin/rsync'
 };
 
 ################################################################################
@@ -269,7 +268,6 @@ sub backup_host {
 		'one-file-system'	=> 1,
 		'partial'			=> 1,
 		'relative'			=> 1,
-		'rsync-path'		=> RSYNCPATH,
 	);
 
 	$settings{'bwlimit'} = $bwlimit if defined $bwlimit;
