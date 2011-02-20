@@ -381,7 +381,7 @@ sub write_log {
 
 	print $fh "$date: $line\n";
 	
-	print "$line\n" if $args->{'v'};
+	print "$date: $line\n" if $args->{'v'};
 
 	close $fh or die "Could not close $logfile: $!";
 }
