@@ -22,6 +22,7 @@ use File::Path qw(remove_tree);
 use File::Rsync;
 use Getopt::Std;
 use Parallel::ForkManager;
+use POSIX qw(strftime);
 use sigtrap qw(handler cleanup_and_exit normal-signals);
 
 use constant {
@@ -249,8 +250,17 @@ sub backup_host {
 	my $backup_root = $conf->{'general'}->{'backup_root'};
 	my $bwlimit = $hostconf->{'bwlimit'} ? $hostconf->{'bwlimit'} : 0;
 
-	my $dst = "$backup_root/$name/$name.0.unfinished";
-	my $prev = "$backup_root/$name/$name.0";
+	my $dst = "$backup_root/$name/$name.".mkdate().".unfinished";
+	#my $dst = "$backup_root/$name/$name.0.unfinished";
+	#my $prev = "$backup_root/$name/$name.0";
+	my $prev = "$backup_root/$name".readlink "$backup_root/$name/$name.latest" or die ("Could not readlink: $!");
+
+	# Update the <name>.latest symlink.
+	write_log("Unlinking $name.latest", 5);
+	unlink("$backup_root/$name/$name.latest") or die "Could not unlink $backup_root/$name/$name.latest: $!";
+
+	write_log("Creating $name.latest -> $dst link", 5);
+	symlink($dst, "$backup_root/$name/$name.latest") or die "Could not create $backup_root/$name/$name.latest -> $dst link: $!";
 
 	my $secs = $config->{'general'}{'seconds_between_retries'};
 	my $retries = $config->{'general'}{'retries'};
@@ -307,13 +317,24 @@ sub backup_host {
 
 	}
 
-	write_log("Rotating backups", 5);
-	rotate_backups($name);
-
+	#write_log("Rotating backups", 5);
+	#rotate_backups($name);
 	
-	write_log("Moving $dst to $backup_root/$name.0", 5);
-	move("$dst", "$backup_root/$name/$name.0") or die "Could not move $dst to $backup_root/$name.0: $!";
+	#write_log("Moving $dst to $backup_root/$name.0", 5);
+	#move("$dst", "$backup_root/$name/$name.0") or die "Could not move $dst to $backup_root/$name.0: $!";
 
+	# Now that the backup has finished we should rename the backup and update
+	# the <name>.latest link.
+	my $newdst = $dst;
+	$newdst =~ s,\.unfinished,,g;
+	write_log("Moving $dst to $newdst", 5);
+	move($dst, $newdst) or die "Could not move $dst to $newdst: $!";
+
+	write_log("Unlinking $name.latest", 5);
+	unlink("$backup_root/$name/$name.latest") or die "Could not unlink $backup_root/$name/$name.latest: $!";
+
+	write_log("Creating $name.latest -> $newdst link", 5);
+	symlink($newdst, "$backup_root/$name/$name.latest") or die "Could not create $backup_root/$name/$name.latest -> $newdst link: $!";
 }
 
 # is_comment($line)
@@ -360,8 +381,15 @@ sub strip_trailing_slash {
 }
 
 # Return date to use in log files
-sub mkdate {
+sub mklogdate {
 	return localtime;
+}
+
+sub mkdate {
+	return strftime('%Y-%m-%d.%H-%M-%S', localtime);
+#	my ($sec, $min, $hour, $mday, $mon, $year, undef) = localtime(time);
+#	$year += 1900;
+#	return "$year-$mon-$mday.$hour-$min-$sec";
 }
 
 # Write log message.
@@ -377,7 +405,7 @@ sub write_log {
 	chomp($line);
 
 	open my $fh, ">> $logfile" or die "Could not open $logfile: $!";
-	my $date = mkdate();
+	my $date = mklogdate();
 
 	print $fh "$date: $line\n";
 	
