@@ -17,6 +17,7 @@ use strict;
 use warnings;
 
 use Config::Scoped;
+use File::Basename;
 use File::Copy;
 use File::Path qw(remove_tree);
 use File::Rsync;
@@ -55,6 +56,7 @@ my $lock_directory;
 $args = parse_args();
 
 VERSION_MESSAGE() if defined $args->{'V'};
+HELP_MESSAGE() if defined $args->{'h'};
 
 # Read the configuration file.
 $config = read_conf();
@@ -75,7 +77,17 @@ do_backups($config);
 
 # Tell everyone what version we're running!
 sub VERSION_MESSAGE {
-	print "$0 version $VERSION\n";
+	my $prog = basename($0);
+	print "$prog version $VERSION\n";
+	exit(1);
+}
+
+sub HELP_MESSAGE {
+	my $prog = basename($0);
+	print "$prog version $VERSION\n\n";
+	print "-h, --help: This help text\n";
+	print "-v, --version: display what version of $prog we are running\n";
+	print "-m <machine>: Machine to backup. Must be listed in sjk-backup.conf\n";
 	exit(1);
 }
 
