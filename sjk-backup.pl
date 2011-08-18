@@ -84,7 +84,7 @@ sub parse_args {
 	my %args;
 	my $res;
 
-	if (($res = getopts('hvV', \%args)) != 1) {
+	if (($res = getopts('hvVm:', \%args)) != 1) {
 		print STDERR "Type $0 --help for help.\n";
 		exit(1);
 	}
@@ -225,6 +225,18 @@ sub print_info {
 sub do_backups {
 	my $config = shift;
 	my $pfm = new Parallel::ForkManager($config->{'general'}{'max_concurrent_rsyncs'}); 
+
+	# If we have been given orders about backing up a specific machine, using
+	# the -m switch, we should only worry about that.
+	if (defined($args->{'m'})) {
+		die "$args->{'m'} is not in the config file." unless defined $config->{'backup'}{$args->{'m'}};
+		die "Could not create lock file - are we already rsyncing this?" if create_lock_file($args->{'m'});
+		backup_host($args->{'m'}, $config);
+		remove_lock_file($args->{'m'});
+		return;
+	}
+		
+	# Otherwise we would backup all the machines listed in sjk-backup.conf.
 	foreach my $key (keys %{$config->{'backup'}}) {
 		# If the lock file already exists a sync is probably already going.
 		next if create_lock_file($key); 
@@ -238,6 +250,7 @@ sub do_backups {
 		remove_lock_file($key);
 		$pfm->finish;
 	}
+
 	$pfm->wait_all_children;
 }
 
