@@ -279,7 +279,8 @@ sub backup_host {
 	my $dst = "$backup_root/$name/$name.".mkdate().".unfinished";
 	#my $dst = "$backup_root/$name/$name.0.unfinished";
 	#my $prev = "$backup_root/$name/$name.0";
-	my $prev = readlink "$backup_root/$name/$name.latest" or die ("Could not readlink: $!");
+	my $prev = readlink "$backup_root/$name/$name.latest";
+	chomp($prev);
 
 	# XXX: Don't do this until the backup has finished! Otherwise we'll be in
 	# trouble if the user cancels the backup and restarts it.
