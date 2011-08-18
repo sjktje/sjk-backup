@@ -281,12 +281,14 @@ sub backup_host {
 	#my $prev = "$backup_root/$name/$name.0";
 	my $prev = readlink "$backup_root/$name/$name.latest" or die ("Could not readlink: $!");
 
+	# XXX: Don't do this until the backup has finished! Otherwise we'll be in
+	# trouble if the user cancels the backup and restarts it.
 	# Update the <name>.latest symlink.
-	write_log("Unlinking $name.latest", 5);
-	unlink("$backup_root/$name/$name.latest") or die "Could not unlink $backup_root/$name/$name.latest: $!";
+	#write_log("Unlinking $name.latest", 5);
+	#unlink("$backup_root/$name/$name.latest") or die "Could not unlink $backup_root/$name/$name.latest: $!";
 
-	write_log("Creating $name.latest -> $dst link", 5);
-	symlink($dst, "$backup_root/$name/$name.latest") or die "Could not create $backup_root/$name/$name.latest -> $dst link: $!";
+	#write_log("Creating $name.latest -> $dst link", 5);
+	#symlink($dst, "$backup_root/$name/$name.latest") or die "Could not create $backup_root/$name/$name.latest -> $dst link: $!";
 
 	my $secs = $config->{'general'}{'seconds_between_retries'};
 	my $retries = $config->{'general'}{'retries'};
