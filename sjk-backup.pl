@@ -249,6 +249,7 @@ sub backup_host {
 	my $host = $hostconf->{'host'};
 	my $backup_root = $conf->{'general'}->{'backup_root'};
 	my $bwlimit = $hostconf->{'bwlimit'} ? $hostconf->{'bwlimit'} : 0;
+	my $exclude = $hostconf->{'exclude'};
 
 	my $dst = "$backup_root/$name/$name.".mkdate().".unfinished";
 	#my $dst = "$backup_root/$name/$name.0.unfinished";
@@ -274,6 +275,7 @@ sub backup_host {
 		'human-readable'	=> 1,
 		'inplace'			=> 1,
 		'link-dest'			=> [ $prev ],
+		'exclude'			=> $exclude,
 		'numeric-ids'		=> 1,
 		'one-file-system'	=> 1,
 		'partial'			=> 1,
