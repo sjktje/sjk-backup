@@ -253,7 +253,7 @@ sub backup_host {
 	my $dst = "$backup_root/$name/$name.".mkdate().".unfinished";
 	#my $dst = "$backup_root/$name/$name.0.unfinished";
 	#my $prev = "$backup_root/$name/$name.0";
-	my $prev = "$backup_root/$name".readlink "$backup_root/$name/$name.latest" or die ("Could not readlink: $!");
+	my $prev = "$backup_root/$name/".readlink "$backup_root/$name/$name.latest" or die ("Could not readlink: $!");
 
 	# Update the <name>.latest symlink.
 	write_log("Unlinking $name.latest", 5);
