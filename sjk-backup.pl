@@ -274,13 +274,13 @@ sub backup_host {
 	my $host = $hostconf->{'host'};
 	my $backup_root = $conf->{'general'}->{'backup_root'};
 	my $bwlimit = $hostconf->{'bwlimit'} ? $hostconf->{'bwlimit'} : 0;
-	my $exclude = $hostconf->{'exclude'};
+	my $exclude = $hostconf->{'exclude'} ? $hostconf->{'exclude'} : '';
 
 	my $dst = "$backup_root/$name/$name.".mkdate().".unfinished";
 	#my $dst = "$backup_root/$name/$name.0.unfinished";
 	#my $prev = "$backup_root/$name/$name.0";
 	my $prev = readlink "$backup_root/$name/$name.latest";
-	chomp($prev);
+	chomp($prev) if defined($prev);
 
 	# XXX: Don't do this until the backup has finished! Otherwise we'll be in
 	# trouble if the user cancels the backup and restarts it.
@@ -303,7 +303,7 @@ sub backup_host {
 		'human-readable'	=> 1,
 		'inplace'			=> 1,
 		'link-dest'			=> [ $prev ],
-		'exclude'			=> $exclude,
+		'exclude'			=> [ $exclude ],
 		'numeric-ids'		=> 1,
 		'one-file-system'	=> 1,
 		'partial'			=> 1,
