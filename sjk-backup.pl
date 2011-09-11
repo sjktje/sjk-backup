@@ -360,8 +360,10 @@ sub backup_host {
 	write_log("Moving $dst to $newdst", 5);
 	move($dst, $newdst) or die "Could not move $dst to $newdst: $!";
 
-	write_log("Unlinking $name.latest", 5);
-	unlink("$backup_root/$name/$name.latest") or die "Could not unlink $backup_root/$name/$name.latest: $!";
+	if (-l "$backup_root/$name/$name.latest") {
+		write_log("Unlinking $name.latest", 5);
+		unlink("$backup_root/$name/$name.latest") or die "Could not unlink $backup_root/$name/$name.latest: $!";
+	}
 
 	write_log("Creating $name.latest -> $newdst link", 5);
 	symlink($newdst, "$backup_root/$name/$name.latest") or die "Could not create $backup_root/$name/$name.latest -> $newdst link: $!";
