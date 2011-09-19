@@ -106,6 +106,8 @@ sub parse_args {
 
 
 # Rotate backups (and delete oldest)
+# DEPRECATED: This function is not used in the current version of sjk-backup.
+# Backups are now named by date, and are not incremented.
 sub rotate_backups {
 	my $name = shift;
 	my $max = $config->{'backup'}{$name}{'number_of_backups'};
