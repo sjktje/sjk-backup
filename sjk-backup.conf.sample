@@ -1,5 +1,5 @@
 general {
-	# Backups will be put under $backup_root/$name/$name.N
+	# Where to keep backups
 	backup_root = "/data/backups"
 	
 	# Number of rsync processes that should be run at the same time. Default is 4.
@@ -24,6 +24,7 @@ general {
 	seconds_between_retries = 600
 }
 
+
 # Creates a backup entry called "somebox". Entry names must be unique.
 backup "somebox" {
 	# Host to backup. Skip this if backing up local filesystems.
@@ -37,13 +38,9 @@ backup "somebox" {
 
 	# Optionally limit bandwidth usage when backing up this host (kbps).
 	bwlimit = 800
-
-	# Number of incremental backups to keep.
-	number_of_backups = 30
 }
 
 # Example of local backup.
 backup "localhost" {
 	path = [ "/Users/sjk" ]
-	number_of_backups = 30
 }
