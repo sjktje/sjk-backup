@@ -84,10 +84,12 @@ sub VERSION_MESSAGE {
 
 sub HELP_MESSAGE {
 	my $prog = basename($0);
-	print "$prog version $VERSION\n\n";
-	print "-h, --help: This help text\n";
-	print "-v, --version: display what version of $prog we are running\n";
-	print "-m <machine>: Machine to backup. Must be listed in sjk-backup.conf\n";
+	print <<EOD;
+$prog version $VERSION
+-h, --help\t: This help text
+-v, --version\t: display what version of $prog we are running
+-m <machine>\t: Machine to backup. Must be listed in sjk-backup.conf
+EOD
 	exit(1);
 }
 
