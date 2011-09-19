@@ -3,3 +3,4 @@
     sjk-backup may fail connecting to a host before giving up. This would be
     useful for automatic backing up of laptops and other machines that aren't
     online all the time.
+[ ] Add documentation/howto
