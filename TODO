@@ -4,3 +4,5 @@
     useful for automatic backing up of laptops and other machines that aren't
     online all the time.
 [ ] Add documentation/howto
+[ ] Add support for remote commands to be run on the host before doing the
+	rsync. Would be useful for the backing up of databases, etc.
