@@ -6,3 +6,7 @@
 [ ] Add documentation/howto
 [ ] Add support for remote commands to be run on the host before doing the
 	rsync. Would be useful for the backing up of databases, etc.
+[ ] Add support for backup intervals. Each host could have a "when" directive,
+	that could be "hourly", "daily", "weekly" and perhaps even "monthly". 
+	sjk-backup would keep track of when a backup was last made. Then one would
+	call sjk-backup hourly from crontab.
