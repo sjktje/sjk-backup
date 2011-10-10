@@ -299,7 +299,8 @@ sub backup_host {
 	my $retries = $config->{'general'}{'retries'};
 
 	my %settings = (
-		#'acls'				=> 1,
+		'acls'				=> 1,
+		'xattrs'			=> 1,
 		'archive'			=> 1,
 		'delete'			=> 1,
 		'delete-excluded'	=> 1,
